@@ -12,7 +12,7 @@ namespace DS_IP92_LR6._1_ZalizchukD
             string path = Directory.GetCurrentDirectory() + "\\input.txt";
             
             Graph graph = new Graph(path);
-            graph.mSmezhOutput();
+            graph.MSmezhOutput();
         }
     }
 
@@ -20,6 +20,7 @@ namespace DS_IP92_LR6._1_ZalizchukD
     {
         private int n, m;
         private int[,] mSmezh;
+        private int[] vertexPowers;
         
         public Graph(string path)
         {
@@ -29,6 +30,7 @@ namespace DS_IP92_LR6._1_ZalizchukD
             n = Convert.ToInt32(temp[0]);
             m = Convert.ToInt32(temp[1]);
             mSmezh = new int[n, n];
+            vertexPowers = new int[n];
 
             for (int i = 0; i < m; i++)
             {
@@ -38,9 +40,15 @@ namespace DS_IP92_LR6._1_ZalizchukD
                 mSmezh[a, b] = 1;
                 mSmezh[b, a] = 1;
             }
+
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    if (mSmezh[i, j] == 1)
+                        vertexPowers[i]++;
+            
         }
 
-        public void mSmezhOutput()
+        public void MSmezhOutput()
         {
             for (int i = 0; i < n; i++)
             {
