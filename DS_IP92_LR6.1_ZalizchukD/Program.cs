@@ -2,6 +2,8 @@
 using static System.IO.Directory;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 
 namespace DS_IP92_LR6._1_ZalizchukD
 {
@@ -12,9 +14,18 @@ namespace DS_IP92_LR6._1_ZalizchukD
             string path = Directory.GetCurrentDirectory() + "\\input.txt";
             
             Graph graph = new Graph(path);
-            graph.EilerPath();
-            //graph.MSmezhOutput();
+           //graph.EilerPath();
+           //graph.HamiltonianPath();
+           List<int> array = new List<int>();
+           for (int i = 0; i < 10; i++)
+           {
+               array.Add(i);
+           }
+
+           
+
         }
+
     }
 
     class Graph
@@ -22,8 +33,9 @@ namespace DS_IP92_LR6._1_ZalizchukD
         private int n, m;
         private int[,] mSmezh;
         private int[] vertexPowers;
-        private bool eilerCycle = true, eilerPath;
-        
+        private bool eilerCycle = true, eilerPath, hamiltonian;
+        private Stack<int> stack;
+
         public Graph(string path)
         {
             StreamReader sr = new StreamReader(path);
@@ -47,7 +59,13 @@ namespace DS_IP92_LR6._1_ZalizchukD
                 for (int j = 0; j < n; j++)
                     if (mSmezh[i, j] == 1)
                         vertexPowers[i]++;
+            
+            CheckEiler();
+            CheckHamiltonian();
+        }
 
+        private void CheckEiler()
+        {
             int count = 0;
             foreach (var power in vertexPowers)
                 if (power % 2 != 0)
@@ -62,7 +80,23 @@ namespace DS_IP92_LR6._1_ZalizchukD
                 eilerPath = true;
             else
                 eilerPath = false;
+        }
 
+        private void CheckHamiltonian()
+        {
+            if (n >= 3)
+            {
+                for (int i = 0; i < n; i++)
+                    if (vertexPowers[i] < n / 2)
+                    {
+                        hamiltonian = false;
+                        break;
+                    }
+
+                hamiltonian = true;
+            }
+            else
+                hamiltonian = false;
         }
 
         public void EilerPath()
@@ -90,7 +124,7 @@ namespace DS_IP92_LR6._1_ZalizchukD
                 Console.Write("Найден Эйлеров цикл и путь: ");
 
             int[,] rebra = mSmezh;
-            Stack<int> stack = new Stack<int>();
+            stack = new Stack<int>();
             stack.Push(v);
             while (stack.Count != 0)
             {
@@ -113,6 +147,37 @@ namespace DS_IP92_LR6._1_ZalizchukD
             
         }
 
+        public void HamiltonianPath()
+        {
+            if (!hamiltonian)
+            {
+                Console.WriteLine("Гамильтоновый цикл и путь отсутствуют.");
+                return;
+            }
+            
+            List<int> queue = new List<int>();
+            for (int i = 0; i < n; i++)
+                queue.Add(i);
+            
+            
+
+
+        }
+
+        public void SwapSubArray(List<int> array, int start, int finish)
+        {
+            start--;
+            finish++;
+            int count = (finish - start) / 2, temp;
+            while (count != 0)
+            {
+                temp = array[start + count];
+                array[start + count] = array[finish - count];
+                array[finish - count] = temp;
+                count--;
+            }
+        }
+
         public void MSmezhOutput()
         {
             for (int i = 0; i < n; i++)
@@ -124,5 +189,4 @@ namespace DS_IP92_LR6._1_ZalizchukD
         }
         
     }
-    
 }
