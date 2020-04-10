@@ -15,15 +15,7 @@ namespace DS_IP92_LR6._1_ZalizchukD
             
             Graph graph = new Graph(path);
            //graph.EilerPath();
-           //graph.HamiltonianPath();
-           List<int> array = new List<int>();
-           for (int i = 0; i < 10; i++)
-           {
-               array.Add(i);
-           }
-
-           
-
+           graph.HamiltonianPath();
         }
 
     }
@@ -147,7 +139,7 @@ namespace DS_IP92_LR6._1_ZalizchukD
             
         }
 
-        public void HamiltonianPath()
+        public void HamiltonianCycle()
         {
             if (!hamiltonian)
             {
@@ -158,8 +150,28 @@ namespace DS_IP92_LR6._1_ZalizchukD
             List<int> queue = new List<int>();
             for (int i = 0; i < n; i++)
                 queue.Add(i);
+
+            int point;
+            for (int k = 0; k < n*(n-1); k++)
+            {
+                if (mSmezh[queue[0], queue[1]] != 1)
+                {
+                    point = 2;
+                    while (mSmezh[queue[0], queue[point]] != 1 || mSmezh[queue[1], queue[point + 1]] != 1)
+                        point++;
+                    SwapSubArray(queue, 1, point);
+                }
+
+                queue.Add(queue[0]);
+                queue.RemoveAt(0);
+            }
             
-            
+            queue.Add(queue[0]);
+            Console.Write("Найден Гамильтонов цикл: ");
+            foreach (var el in queue)
+            {
+                Console.Write($"{el + 1} ");
+            }
 
 
         }
