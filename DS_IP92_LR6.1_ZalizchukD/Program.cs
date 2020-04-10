@@ -12,7 +12,8 @@ namespace DS_IP92_LR6._1_ZalizchukD
             string path = Directory.GetCurrentDirectory() + "\\input.txt";
             
             Graph graph = new Graph(path);
-            graph.MSmezhOutput();
+            graph.EilerPath();
+            //graph.MSmezhOutput();
         }
     }
 
@@ -21,12 +22,13 @@ namespace DS_IP92_LR6._1_ZalizchukD
         private int n, m;
         private int[,] mSmezh;
         private int[] vertexPowers;
+        private bool eilerCycle = true, eilerPath;
         
         public Graph(string path)
         {
             StreamReader sr = new StreamReader(path);
-            string rd = sr.ReadLine();
-            string[] temp = rd.Split(' ');
+            string read = sr.ReadLine();
+            string[] temp = read.Split(' ');
             n = Convert.ToInt32(temp[0]);
             m = Convert.ToInt32(temp[1]);
             mSmezh = new int[n, n];
@@ -34,8 +36,8 @@ namespace DS_IP92_LR6._1_ZalizchukD
 
             for (int i = 0; i < m; i++)
             {
-                rd = sr.ReadLine();
-                temp = rd.Split(' ');
+                read = sr.ReadLine();
+                temp = read.Split(' ');
                 int a = Convert.ToInt32(temp[0]) - 1, b = Convert.ToInt32(temp[1]) - 1;
                 mSmezh[a, b] = 1;
                 mSmezh[b, a] = 1;
@@ -45,6 +47,69 @@ namespace DS_IP92_LR6._1_ZalizchukD
                 for (int j = 0; j < n; j++)
                     if (mSmezh[i, j] == 1)
                         vertexPowers[i]++;
+
+            int count = 0;
+            foreach (var power in vertexPowers)
+                if (power % 2 != 0)
+                {
+                    eilerCycle = false;
+                    count++;
+                }
+
+            if (eilerCycle == true)
+                eilerPath = true;
+            else if (count == 2)
+                eilerPath = true;
+            else
+                eilerPath = false;
+
+        }
+
+        public void EilerPath()
+        {
+            int v = 0;
+            if (!eilerCycle)
+            {
+                if (eilerPath)
+                {
+                    for (int i = 0; i < n; i++)
+                        if (vertexPowers[i] % 2 != 0)
+                        {
+                            Console.Write("Эйлеров цикл отсутствует, найден Эйлеров путь: ");
+                            v = i;
+                            break;
+                        }
+                }
+                else
+                {
+                    Console.WriteLine("Эйлеров цикл и путь отсутствуют.");
+                    return;
+                }
+            }
+            else
+                Console.Write("Найден Эйлеров цикл и путь: ");
+
+            int[,] rebra = mSmezh;
+            Stack<int> stack = new Stack<int>();
+            stack.Push(v);
+            while (stack.Count != 0)
+            {
+                v = stack.Peek();
+                for (int i = 0; i < n; i++)
+                    if (rebra[v, i] == 1)
+                    {
+                        stack.Push(i);
+                        rebra[v, i] = 0;
+                        rebra[i, v] = 0;
+                        break;
+                    }
+
+                if (v == stack.Peek())
+                {
+                    stack.Pop();
+                    Console.Write($"{v + 1} ");
+                }
+            }
             
         }
 
