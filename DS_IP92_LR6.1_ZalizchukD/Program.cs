@@ -12,22 +12,45 @@ namespace DS_IP92_LR6._1_ZalizchukD
         static void Main(string[] args)
         {
             string path = Directory.GetCurrentDirectory() + "\\input.txt";
-            
+            string choice;
             Graph graph = new Graph(path);
-           //graph.EilerPath();
-           graph.HamiltonianPath();
+            
+            Console.WriteLine("1. Проверить наличие Эйлерового пути\n2. Проверить наличие Гамильтонового пути");
+            choice = Console.ReadLine();
+
+            if (choice == "1")
+            {
+                Console.Clear();
+                graph.Eiler();
+            } else if (choice == "2")
+            {
+                Console.Clear();
+                graph.Hamiltonian();
+            }
+            else
+            {
+                Console.WriteLine("Ошибка: неверный ввод.");
+                Environment.Exit(0);
+            }
         }
 
     }
 
+    // ================= КЛАСС "ГРАФ" =================
+    
     class Graph
     {
-        private int n, m;
+        private int n, m, start;
         private int[,] mSmezh;
         private int[] vertexPowers;
-        private bool eilerCycle = true, eilerPath, hamiltonian;
+        private bool eilerCycle = true, eilerPath, hamiltonianCycle;
+        private bool[] visited;
+        private List<int> hamiltonianPath;
+
         private Stack<int> stack;
 
+        // ================= ЧТЕНИЕ ПРОСТЫХ ДАННЫХ О ГРАФЕ =================
+        
         public Graph(string path)
         {
             StreamReader sr = new StreamReader(path);
@@ -37,6 +60,8 @@ namespace DS_IP92_LR6._1_ZalizchukD
             m = Convert.ToInt32(temp[1]);
             mSmezh = new int[n, n];
             vertexPowers = new int[n];
+            visited = new bool[n];
+            hamiltonianPath = new List<int>();
 
             for (int i = 0; i < m; i++)
             {
@@ -56,6 +81,8 @@ namespace DS_IP92_LR6._1_ZalizchukD
             CheckHamiltonian();
         }
 
+        // ================= ПРОВЕРКА НА ЭЙЛЕРОВОСТЬ =================
+        
         private void CheckEiler()
         {
             int count = 0;
@@ -74,24 +101,28 @@ namespace DS_IP92_LR6._1_ZalizchukD
                 eilerPath = false;
         }
 
+        // ================= ПРОВЕРКА НА ГАМИЛЬТОНОВЫЙ ЦИКЛ =================
+        
         private void CheckHamiltonian()
         {
+            hamiltonianCycle = true;
             if (n >= 3)
             {
                 for (int i = 0; i < n; i++)
                     if (vertexPowers[i] < n / 2)
                     {
-                        hamiltonian = false;
+                        hamiltonianCycle = false;
                         break;
                     }
 
-                hamiltonian = true;
             }
             else
-                hamiltonian = false;
+                hamiltonianCycle = false;
         }
 
-        public void EilerPath()
+        // ================= ЭЙЛЕРОВ ПУТЬ =================
+        
+        public void Eiler()
         {
             int v = 0;
             if (!eilerCycle)
@@ -101,19 +132,19 @@ namespace DS_IP92_LR6._1_ZalizchukD
                     for (int i = 0; i < n; i++)
                         if (vertexPowers[i] % 2 != 0)
                         {
-                            Console.Write("Эйлеров цикл отсутствует, найден Эйлеров путь: ");
+                            Console.Write("Найден Эйлеров путь: ");
                             v = i;
                             break;
                         }
                 }
                 else
                 {
-                    Console.WriteLine("Эйлеров цикл и путь отсутствуют.");
+                    Console.WriteLine("Эйлеров путь отсутствует.");
                     return;
                 }
             }
             else
-                Console.Write("Найден Эйлеров цикл и путь: ");
+                Console.Write("Найден Эйлеров цикл: ");
 
             int[,] rebra = mSmezh;
             stack = new Stack<int>();
@@ -136,69 +167,91 @@ namespace DS_IP92_LR6._1_ZalizchukD
                     Console.Write($"{v + 1} ");
                 }
             }
+            Console.WriteLine();
             
         }
 
-        public void HamiltonianCycle()
-        {
-            if (!hamiltonian)
-            {
-                Console.WriteLine("Гамильтоновый цикл и путь отсутствуют.");
-                return;
-            }
-            
-            List<int> queue = new List<int>();
-            for (int i = 0; i < n; i++)
-                queue.Add(i);
-
-            int point;
-            for (int k = 0; k < n*(n-1); k++)
-            {
-                if (mSmezh[queue[0], queue[1]] != 1)
-                {
-                    point = 2;
-                    while (mSmezh[queue[0], queue[point]] != 1 || mSmezh[queue[1], queue[point + 1]] != 1)
-                        point++;
-                    SwapSubArray(queue, 1, point);
-                }
-
-                queue.Add(queue[0]);
-                queue.RemoveAt(0);
-            }
-            
-            queue.Add(queue[0]);
-            Console.Write("Найден Гамильтонов цикл: ");
-            foreach (var el in queue)
-            {
-                Console.Write($"{el + 1} ");
-            }
-
-
-        }
-
-        public void SwapSubArray(List<int> array, int start, int finish)
-        {
-            start--;
-            finish++;
-            int count = (finish - start) / 2, temp;
-            while (count != 0)
-            {
-                temp = array[start + count];
-                array[start + count] = array[finish - count];
-                array[finish - count] = temp;
-                count--;
-            }
-        }
-
-        public void MSmezhOutput()
-        {
-            for (int i = 0; i < n; i++)
-            {
-                for (int j = 0; j < n; j++)
-                    Console.Write("{0,4}", mSmezh[i,j]);
-                Console.WriteLine();
-            }
-        }
+        // ================= ГАМИЛЬТОНОВ ПУТЬ =================
         
+        public void Hamiltonian()
+        {
+            if (hamiltonianCycle)
+            {
+                for (int i = 0; i < n; i++)
+                {
+                    start = i;
+                    HamiltonianCycle(start);
+                }
+                
+                Console.WriteLine("Гамильтонов путь отсутствует.");
+            }
+            else
+            {
+                for (int i = 0; i < n; i++)
+                    HamiltonianPath(i);
+                
+                Console.WriteLine("Гамильтонов путь отсутствует.");
+            }
+        }
+
+        // ================= ГАМИЛЬТОНОВ ЦИКЛ, БЕКТРЕКИНГ =================
+        
+        private void HamiltonianCycle(int v)
+        {
+            if (hamiltonianPath.Count == n && mSmezh[hamiltonianPath[0], hamiltonianPath[n - 1]] == 1)
+            {
+                hamiltonianPath.Add(hamiltonianPath[0]);
+                Console.Write("Найден Гамильтонов цикл: ");
+                foreach (var el in hamiltonianPath)
+                    Console.Write($"{el + 1} ");
+                
+                Console.WriteLine();
+                Environment.Exit(0);
+            }
+
+            for (int i = 0; i < n; i++)
+            {
+                if (mSmezh[v, i] == 1 && !visited[i])
+                {
+                    visited[i] = true;
+                    hamiltonianPath.Add(i);
+                    HamiltonianCycle(i);
+
+                    visited[i] = false;
+                    hamiltonianPath.RemoveAt(hamiltonianPath.Count - 1);
+                }
+            }
+
+        }
+
+        // ================= ГАМИЛЬТОНОВ ПУТЬ, БЕКТРЕКИНГ =================
+        
+        private void HamiltonianPath(int v)
+        {
+            if (hamiltonianPath.Count == n)
+            {
+                Console.Write("Найден Гамильтонов путь: ");
+                foreach (var el in hamiltonianPath)
+                    Console.Write($"{el + 1} ");
+                
+                Console.WriteLine();
+                Environment.Exit(0);
+            }
+
+            for (int i = 0; i < n; i++)
+            {
+                if (mSmezh[v, i] == 1 && !visited[i])
+                {
+                    visited[i] = true;
+                    hamiltonianPath.Add(i);
+                    HamiltonianPath(i);
+
+                    visited[i] = false;
+                    hamiltonianPath.RemoveAt(hamiltonianPath.Count - 1);
+                }
+            }
+
+        }
+
     }
 }
