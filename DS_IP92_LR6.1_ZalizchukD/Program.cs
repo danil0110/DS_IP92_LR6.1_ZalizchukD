@@ -15,7 +15,7 @@ namespace DS_IP92_LR6._1_ZalizchukD
             string choice;
             Graph graph = new Graph(path);
             
-            Console.WriteLine("1. Проверить наличие Эйлерового пути\n2. Проверить наличие Гамильтонового пути");
+            Console.WriteLine("1. Проверить наличие Эйлерова пути\n2. Проверить наличие Гамильтонова пути");
             choice = Console.ReadLine();
 
             if (choice == "1")
@@ -101,7 +101,7 @@ namespace DS_IP92_LR6._1_ZalizchukD
                 eilerPath = false;
         }
 
-        // ================= ПРОВЕРКА НА ГАМИЛЬТОНОВЫЙ ЦИКЛ =================
+        // ================= ПРОВЕРКА НА ГАМИЛЬТОНОВ ЦИКЛ =================
         
         private void CheckHamiltonian()
         {
